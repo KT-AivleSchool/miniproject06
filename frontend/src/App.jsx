@@ -2,6 +2,7 @@ import { useState } from 'react'
 import "./App.css";
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
 import BookListPage from './pages/BookListPage';
 import BookEditPage from './pages/BookEditPage';
 import BookDetailPage from './pages/BookDetailPage';
@@ -46,6 +47,7 @@ function App() {
                                                             }
                                                         }
        />}
+      {page === 'login' && <LoginPage onNavigate={setPage} />}
     </>
   );
 }

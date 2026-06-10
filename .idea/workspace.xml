@@ -4,8 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fe0e3535-6e55-49f8-a0f6-18f936823ece" name="변경" comment="">
+    <list default="true" id="fe0e3535-6e55-49f8-a0f6-18f936823ece" name="변경" comment="css 수정 전">
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/Login.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,6 +99,19 @@
       <option name="presentableId" value="Default" />
       <updated>1780979387039</updated>
     </task>
+    <task id="LOCAL-00001" summary="css 수정 전">
+      <option name="closed" value="true" />
+      <created>1781069172183</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1781069172183</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="css 수정 전" />
+    <option name="LAST_COMMIT_MESSAGE" value="css 수정 전" />
   </component>
 </project>
