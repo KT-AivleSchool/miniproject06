@@ -5,6 +5,8 @@ import com.aivle.bookapp.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.aivle.bookapp.exception.BookNotFoundException;
+import com.aivle.bookapp.exception.CoverImageException;
 
 import java.util.List;
 
@@ -23,8 +25,8 @@ public class BookService {
     // 도서 상세 조회
     @Transactional(readOnly = true)
     public Book getBook(Long id) {
-        return bookRepository.findById(id).orElseThrow(()
-            -> new RuntimeException("Book not found:" + id));
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
     }
 
     // 도서 등록
@@ -65,6 +67,10 @@ public class BookService {
     public Book updateBookCover(Long id, String coverImageUrl) {
         Book book = getBook(id);
 
+        if (coverImageUrl == null || coverImageUrl.isBlank()) {
+            throw new CoverImageException("저장할 표지 이미지가 없습니다.");
+        }
+
         book.setCoverImageUrl(coverImageUrl);
 
         return bookRepository.save(book);
@@ -73,20 +79,18 @@ public class BookService {
     // 제목으로 도서 GET
     @Transactional(readOnly = true)
     public List<Book> searchByTitle(String title) {
-        return bookRepository.findByTitle(title);
+        return bookRepository.findByTitleContaining(title);
     }
 
     // 작가명으로 도서 GET
     @Transactional(readOnly = true)
-    public List<String> authorGetTitle(String author) {
-        List<Book> books = bookRepository.findByAuthor(author);
-
-        return books.stream().map(book -> book.getTitle()).toList();
+    public List<Book> authorGetTitle(String author) {
+        return bookRepository.findByAuthorContaining(author);
     }
 
-    // 제목 키워드로 도서 GET
+    // 제목, 저자 키워드로 도서 GET
     @Transactional(readOnly = true)
     public List<Book> searchByKeyword(String keyword) {
-        return bookRepository.findByTitleContaining(keyword);
+        return bookRepository.searchByKeyword(keyword);
     }
 }
