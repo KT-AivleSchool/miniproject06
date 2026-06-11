@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { generateCoverImage } from '../api/openai';
 
-export default function GenerateCoverImage({ book, onNavigate }) {
+export default function GenerateCoverImage({ book, onNavigate, onSuccess }) {
     const [selectedStyle, setSelectedStyle] = useState('none');
     const [extraDetail, setExtraDetail] = useState('');
     const [userApiKey, setUserApiKey] = useState('');
@@ -164,7 +164,11 @@ export default function GenerateCoverImage({ book, onNavigate }) {
 
                                     alert('표지가 성공적으로 저장되었습니다!');
 
-                                    onNavigate('edit');
+                                    if (onSuccess) {
+                                        onSuccess(src);
+                                    } else {
+                                        onNavigate('edit');
+                                    }
                                 }}
                             />
                         ))}

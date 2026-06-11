@@ -55,7 +55,13 @@ function App() {
        />}
       {page === 'login' && (<LoginPage onNavigate={setPage} setIsLogin={setIsLogin}/>)}
       {page === 'signup' && <SignUpPage onNavigate={setPage} />}
-      {page === 'generateCover' && <GenerateCoverImage onNavigate={setPage} book={editingBook} />}
+      {page === 'generateCover' && (
+          <GenerateCoverImage onNavigate={setPage} book={editingBook} onSuccess={(newImageUrl) => {
+                setEditingBook({ ...editingBook, coverImageUrl: newImageUrl });
+                setPage('edit');
+              }}
+          />
+      )}
     </>
   );
 }
