@@ -237,20 +237,23 @@ http://localhost:5173
 
 ![메인 화면](images/main.png)
 
+### 도서 목록 화면
+![도서 목록 화면](images/booklist.png)
+
 ### 도서 등록 화면
 
 ![도서 등록 화면](images/new.png)
 
-### 도서 목록 화면
-추후 올림
+### 도서 수정 화면
+![도서 수정 화면](images/edit.jpg)
+
+
 
 ### AI 표지 생성 화면
 
-![AI 표지 생성 화면](images/ai.png)
+![AI 표지 생성 화면](images/ai.jpg)
 
-
-![AI 표지 선택 화면](images/ai2.png)
-
+![AI 표지 생성 화면](images/ai2.jpg)
 ### 도서 상세 화면
 
 ![도서 상세 화면](images/detail.png)
