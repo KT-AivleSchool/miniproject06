@@ -1,5 +1,5 @@
 # 1단계: 빌드 스테이지
-FROM node:20-alpine AS build
+FROM public.ecr.aws/docker/library/node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
