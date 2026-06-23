@@ -1,5 +1,5 @@
 # 1단계: 빌드 스테이지
-FROM gradle:8.5-jdk17 AS build
+FROM public.ecr.aws/docker/library/gradle:8.5-jdk17 AS build
 WORKDIR /app
 COPY . .
 # 실행 권한 부여 및 빌드
@@ -7,7 +7,7 @@ RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon -x test
 
 # 2단계: 실행 스테이지
-FROM openjdk:17-jdk-slim
+FROM public.ecr.aws/docker/library/openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
