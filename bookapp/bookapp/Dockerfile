@@ -7,7 +7,7 @@ RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon -x test
 
 # 2단계: 실행 스테이지
-FROM public.ecr.aws/docker/library/openjdk:17-jdk-slim
+FROM public.ecr.aws/docker/library/eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
