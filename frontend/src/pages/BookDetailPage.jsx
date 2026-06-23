@@ -36,14 +36,14 @@ function BookDetailPage({ onNavigate, bookId, onEditClick }) {
   //추가된 좋아요 불러오기
   useEffect(() => {
     async function fetchLikes() {
-      const resCount = await fetch(`http://localhost:8080/api/likes/count/${bookId}`);
+      const resCount = await fetch(`/api/likes/count/${bookId}`);
       const count = await resCount.json();
       setLikeCount(count);
 
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const resLiked = await fetch(`http://localhost:8080/api/likes/${bookId}`, {
+      const resLiked = await fetch(`/api/likes/${bookId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -79,14 +79,14 @@ function BookDetailPage({ onNavigate, bookId, onEditClick }) {
     const token = localStorage.getItem("token");
 
     if (liked) {
-      await fetch(`http://localhost:8080/api/likes/${bookId}`, {
+      await fetch(`/api/likes/${bookId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
     } else {
-      await fetch(`http://localhost:8080/api/likes/${bookId}`, {
+      await fetch(`/api/likes/${bookId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -94,7 +94,7 @@ function BookDetailPage({ onNavigate, bookId, onEditClick }) {
       });
     }
 
-    const res = await fetch(`http://localhost:8080/api/likes/count/${bookId}`);
+    const res = await fetch(`/api/likes/count/${bookId}`);
     const newCount = await res.json();
     setLikeCount(newCount);
 

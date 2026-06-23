@@ -10,7 +10,7 @@ export default function BookCard({ book }) {
         .then(setCommentCount)
         .catch(() => setCommentCount(0));
 
-    fetch(`http://localhost:8080/api/likes/count/${book.id}`)
+    fetch(`/api/likes/count/${book.id}`)
         .then((res) => res.json())
         .then((data) => setLikeCount(data))
         .catch(() => setLikeCount(0));
