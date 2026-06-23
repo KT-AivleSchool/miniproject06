@@ -23,7 +23,7 @@ export default function GenerateCoverImage({ book, onNavigate, onSuccess }) {
             }
 
             const response = await fetch(
-                "http://localhost:8080/api/auth/apikey",
+                "/api/auth/apikey",
                 {
                     method: "GET",
                     headers: {
@@ -152,7 +152,7 @@ export default function GenerateCoverImage({ book, onNavigate, onSuccess }) {
                                 alt="생성된 AI 표지 후보"
                                 className="generated-cover-img"
                                 onClick={async () => {
-                                    const patchRes = await fetch(`http://localhost:8080/api/books/${book.id}/cover`, {
+                                    const patchRes = await fetch(`/api/books/${book.id}/cover`, {
                                         method: 'PATCH',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({ coverImageUrl: src }),

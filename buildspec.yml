@@ -25,7 +25,7 @@ phases:
       - echo "Build started on `date`"
       - echo "Building the Frontend Docker image..."
       # frontend 디렉토리 안의 Dockerfile을 기반으로 React 앱을 빌드하고 Nginx가 내장된 이미지를 생성합니다.
-      - docker build -t $REPOSITORY_URI_FRONT:latest ./frontend
+      - docker build --no-cache -t $REPOSITORY_URI_FRONT:latest ./frontend
       - docker build -t $REPOSITORY_URI_FRONT:$IMAGE_TAG ./frontend
       - echo "Building the Backend Docker image..."
       # bookapp/bookapp 디렉토리 안의 Dockerfile을 기반으로 Gradle 빌드 및 Spring Boot 이미지를 생성합니다.
@@ -43,12 +43,12 @@ phases:
       - echo "Writing image definitions..."
       # 배포 파이프라인에서 참조할 수 있는 이미지 경로 정의 파일을 아티팩트로 생성합니다.
       - printf '[{"name":"frontend","imageUri":"%s"},{"name":"backend","imageUri":"%s"}]' "$REPOSITORY_URI_FRONT:$IMAGE_TAG" "$REPOSITORY_URI_BACK:$IMAGE_TAG" > imagedefinitions.json
-      
+
       - echo "Substituting image paths in k8s manifests..."
       # k8s-manifests.yaml에 적힌 템플릿 텍스트를 CodeBuild 환경변수와 방금 생성된 이미지 고유 태그 정보로 자동 치환합니다.
       - sed -i "s|<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<BACK_IMAGE_REPO_NAME>:latest|${REPOSITORY_URI_BACK}:${IMAGE_TAG}|g" k8s-manifests.yaml
       - sed -i "s|<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<FRONT_IMAGE_REPO_NAME>:latest|${REPOSITORY_URI_FRONT}:${IMAGE_TAG}|g" k8s-manifests.yaml
-      
+
       - echo "Deploying to Amazon EKS..."
       # CodeBuild 환경에서 kubectl을 이용해 EKS 클러스터에 배포 명령을 직접 전달합니다.
       # (EKS_CLUSTER_NAME 및 AWS_DEFAULT_REGION 환경변수가 정의되어 있어야 합니다.)
