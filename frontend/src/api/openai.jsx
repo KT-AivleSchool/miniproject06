@@ -2,7 +2,7 @@ async function getUserApiKey() {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    "http://localhost:8080/api/auth/apikey",
+    "/api/auth/apikey",
     {
       method: "GET",
       headers: {
