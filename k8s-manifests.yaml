@@ -17,8 +17,7 @@ spec:
     spec:
       containers:
         - name: backend
-          # 이미지 경로는 ECR 업로드에 맞게 수정하십시오.
-          image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<BACK_IMAGE_REPO_NAME>:latest
+          image: BACK_IMAGE_URI
           ports:
             - containerPort: 8080
           volumeMounts:
@@ -61,8 +60,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          # 이미지 경로는 ECR 업로드에 맞게 수정하십시오.
-          image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<FRONT_IMAGE_REPO_NAME>:latest
+          image: FRONT_IMAGE_URI
           ports:
             - containerPort: 80
 ---
