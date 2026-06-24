@@ -47,3 +47,4 @@ artifacts:
   files:
     - imagedefinitions.json
     - k8s-manifests.yaml
+    - deploy-buildspec.yaml
