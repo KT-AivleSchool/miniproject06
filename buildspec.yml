@@ -1,13 +1,6 @@
 version: 0.2
 
 phases:
-  install:
-    commands:
-      - echo "Installing kubectl..."
-      # k8s(EKS) 배포를 위해 CodeBuild 환경에 kubectl CLI를 설치합니다.
-      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-      - chmod +x ./kubectl
-      - mv ./kubectl /usr/local/bin/kubectl
   pre_build:
     commands:
       - echo "Logging in to Amazon ECR..."

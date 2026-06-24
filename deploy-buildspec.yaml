@@ -9,9 +9,7 @@ phases:
 
   pre_build:
     commands:
-      - aws eks update-kubeconfig \
-          --region $AWS_DEFAULT_REGION \
-          --name $EKS_CLUSTER_NAME
+      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
 
   build:
     commands:
@@ -19,6 +17,6 @@ phases:
 
   post_build:
     commands:
-      - kubectl rollout restart deployment/bookapp-backend
-      - kubectl rollout restart deployment/bookapp-frontend
+      - kubectl rollout status deployment/bookapp-backend
+      - kubectl rollout status deployment/bookapp-frontend
       - kubectl get pods
