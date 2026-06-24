@@ -26,6 +26,13 @@ spec:
           image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<BACK_IMAGE_REPO_NAME>:latest
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           readinessProbe:
             httpGet:
               path: /api/books
@@ -81,6 +88,13 @@ spec:
           image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<FRONT_IMAGE_REPO_NAME>:latest
           ports:
             - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
 ---
 # 4. 프론트엔드 서비스 (LoadBalancer - 외부 서비스 노출 및 SSL/HTTPS 적용)
 apiVersion: v1
