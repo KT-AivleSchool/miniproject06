@@ -36,3 +36,4 @@ artifacts:
     - k8s-manifests.yaml
     - hpa.yaml
     - imagedefinitions.json
+    - buildspec-deploy.yml
