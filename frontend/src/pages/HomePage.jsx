@@ -2,7 +2,7 @@ function HomePage({ onNavigate }) {
   return (
     <div className="home-container">
       <h1 className="main-title">
-        도서 관리 시스템에 오신 것을 환영합니다!
+        도서 관리 시스템에 오신 것을 환영합니다! V2.0
       </h1>
 
       <p className="sub-title">
