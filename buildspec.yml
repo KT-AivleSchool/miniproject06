@@ -13,7 +13,7 @@ phases:
       - echo "Logging in to Amazon ECR..."
       - aws --version
       # AWS 계정 ID($AWS_ACCOUNT_ID)와 리전($AWS_DEFAULT_REGION) 환경변수를 바탕으로 ECR 인증을 획득합니다.
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 416225317325.dkr.ecr.ap-northeast-2.amazonaws.com
       # ECR 이미지 업로드를 위한 URI 경로를 변수로 정의합니다.
       - REPOSITORY_URI_FRONT=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$FRONT_IMAGE_REPO_NAME
       - REPOSITORY_URI_BACK=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$BACK_IMAGE_REPO_NAME
