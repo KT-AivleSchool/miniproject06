@@ -1,0 +1,38 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws --version
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI_FRONT=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$FRONT_IMAGE_REPO_NAME
+      - REPOSITORY_URI_BACK=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$BACK_IMAGE_REPO_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:-latest}
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - echo "Building the Frontend Docker image..."
+      - docker build --no-cache -t $REPOSITORY_URI_FRONT:latest ./frontend
+      - docker build -t $REPOSITORY_URI_FRONT:$IMAGE_TAG ./frontend
+      - echo "Building the Backend Docker image..."
+      - docker build -t $REPOSITORY_URI_BACK:latest ./bookapp/bookapp
+      - docker build -t $REPOSITORY_URI_BACK:$IMAGE_TAG ./bookapp/bookapp
+  post_build:
+    commands:
+      - echo "Build completed on `date`"
+      - echo "Pushing the Docker images to ECR..."
+      - docker push $REPOSITORY_URI_FRONT:latest
+      - docker push $REPOSITORY_URI_FRONT:$IMAGE_TAG
+      - docker push $REPOSITORY_URI_BACK:latest
+      - docker push $REPOSITORY_URI_BACK:$IMAGE_TAG
+      - echo "Substituting image paths in k8s manifests..."
+      - sed -i "s|<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<BACK_IMAGE_REPO_NAME>:latest|${REPOSITORY_URI_BACK}:${IMAGE_TAG}|g" k8s-manifests.yaml
+      - sed -i "s|<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<FRONT_IMAGE_REPO_NAME>:latest|${REPOSITORY_URI_FRONT}:${IMAGE_TAG}|g" k8s-manifests.yaml
+      - echo "Writing image definitions..."
+      - printf '[{"name":"frontend","imageUri":"%s"},{"name":"backend","imageUri":"%s"}]' "$REPOSITORY_URI_FRONT:$IMAGE_TAG" "$REPOSITORY_URI_BACK:$IMAGE_TAG" > imagedefinitions.json
+artifacts:
+  files:
+    - k8s-manifests.yaml
+    - hpa.yaml
+    - imagedefinitions.json
