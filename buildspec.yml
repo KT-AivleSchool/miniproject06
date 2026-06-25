@@ -10,21 +10,30 @@ phases:
 
   pre_build:
     commands:
+      - echo "Checking identity..."
+      - aws sts get-caller-identity
       - echo "Logging in to Amazon ECR..."
-      - aws --version
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - REPOSITORY_URI_FRONT=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$FRONT_IMAGE_REPO_NAME
       - REPOSITORY_URI_BACK=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$BACK_IMAGE_REPO_NAME
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:-latest}
       - echo "IMAGE_TAG=$IMAGE_TAG"
+      - export DOCKER_BUILDKIT=0
 
   build:
     commands:
-      - echo "Build and push frontend image..."
-      - docker buildx build --platform linux/amd64 --provenance=false --push -t $REPOSITORY_URI_FRONT:latest -t $REPOSITORY_URI_FRONT:$IMAGE_TAG ./frontend
-      - echo "Build and push backend image..."
-      - docker buildx build --platform linux/amd64 --provenance=false --push -t $REPOSITORY_URI_BACK:latest -t $REPOSITORY_URI_BACK:$IMAGE_TAG ./bookapp/bookapp
+      - echo "Build frontend image..."
+      - docker build -t $REPOSITORY_URI_FRONT:latest -t $REPOSITORY_URI_FRONT:$IMAGE_TAG ./frontend
+      - echo "Push frontend image..."
+      - docker push $REPOSITORY_URI_FRONT:latest
+      - docker push $REPOSITORY_URI_FRONT:$IMAGE_TAG
+
+      - echo "Build backend image..."
+      - docker build -t $REPOSITORY_URI_BACK:latest -t $REPOSITORY_URI_BACK:$IMAGE_TAG ./bookapp/bookapp
+      - echo "Push backend image..."
+      - docker push $REPOSITORY_URI_BACK:latest
+      - docker push $REPOSITORY_URI_BACK:$IMAGE_TAG
 
       - echo "Writing image definitions..."
       - printf '[{"name":"frontend","imageUri":"%s"},{"name":"backend","imageUri":"%s"}]' "$REPOSITORY_URI_FRONT:$IMAGE_TAG" "$REPOSITORY_URI_BACK:$IMAGE_TAG" > imagedefinitions.json
