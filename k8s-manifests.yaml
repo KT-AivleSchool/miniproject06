@@ -10,6 +10,11 @@ spec:
   selector:
     matchLabels:
       app: bookapp-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -17,19 +22,29 @@ spec:
     spec:
       containers:
         - name: backend
-          # 이미지 경로는 ECR 업로드에 맞게 수정하십시오.
           image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<BACK_IMAGE_REPO_NAME>:latest
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
           volumeMounts:
             - name: db-volume
-              # H2 파일 DB가 생성되는 경로인 /app/db를 영구 볼륨에 바인딩
               mountPath: /app/db
       volumes:
         - name: db-volume
           emptyDir: {}
 ---
-# 2. 백엔드 서비스 (ClusterIP - k8s 내부망 노출)
+# 2. 백엔드 서비스 (ClusterIP)
 apiVersion: v1
 kind: Service
 metadata:
@@ -42,7 +57,7 @@ spec:
   selector:
     app: bookapp-backend
 ---
-# 3. 프론트엔드 디플로이먼트 (React + Nginx 프록시)
+# 3. 프론트엔드 디플로이먼트 (React + Nginx)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -54,6 +69,11 @@ spec:
   selector:
     matchLabels:
       app: bookapp-frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -61,12 +81,24 @@ spec:
     spec:
       containers:
         - name: frontend
-          # 이미지 경로는 ECR 업로드에 맞게 수정하십시오.
           image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<FRONT_IMAGE_REPO_NAME>:latest
           ports:
             - containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
 ---
-# 4. 프론트엔드 서비스 (LoadBalancer - 외부 서비스 노출)
+# 4. 프론트엔드 서비스 (LoadBalancer)
 apiVersion: v1
 kind: Service
 metadata:

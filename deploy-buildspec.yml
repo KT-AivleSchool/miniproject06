@@ -1,0 +1,18 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - echo "Installing kubectl..."
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
+  build:
+    commands:
+      - echo "Deploying to Amazon EKS..."
+      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
+      - kubectl apply -f k8s-manifests.yaml
+      - echo "Applying HPA..."
+      - kubectl apply -f hpa.yaml
+      # (선택) 롤아웃 완료까지 대기
+      # - kubectl rollout status deployment/bookapp-backend --timeout=120s
+      # - kubectl rollout status deployment/bookapp-frontend --timeout=120s
