@@ -105,3 +105,29 @@ spec:
       targetPort: 80
   selector:
     app: bookapp-frontend
+
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: chan-ingress
+    namespace: default
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      # 🔒 방금 발급받은 ACM 인증서의 ARN 주소를 여기에 넣어줍니다.
+      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:416225317325:certificate/a140fb47-7d1a-4c87-9e01-7243bfb899b0
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
+  spec:
+    rules:
+      - host: aivle-22.p-e.kr  # 👈 나의 무료 도메인 주소
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: front-service  # 👈 실제 프론트엔드 Service 이름과 일치해야 합니다.
+                  port:
+                    number: 80
