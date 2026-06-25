@@ -63,3 +63,4 @@ artifacts:
     - k8s-manifests.yaml
     - deploy-buildspec.yml   # 추가
     - hpa.yaml
+    - ingress.yaml
