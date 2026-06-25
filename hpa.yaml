@@ -16,7 +16,7 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 50 # CPU 사용율 50% 기준 오토스케일링 트리거
+          averageUtilization: 30 # CPU 사용율 50% 기준 오토스케일링 트리거
 ---
 # 2. 프론트엔드 오토스케일링 (Horizontal Pod Autoscaler)
 apiVersion: autoscaling/v2
@@ -36,4 +36,4 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 50 # CPU 사용율 50% 기준 오토스케일링 트리거
+          averageUtilization: 30 # CPU 사용율 50% 기준 오토스케일링 트리거
