@@ -13,6 +13,5 @@ phases:
       - kubectl apply -f k8s-manifests.yaml
       - echo "Applying HPA..."
       - kubectl apply -f hpa.yaml
-      # (선택) 롤아웃 완료까지 대기
       # - kubectl rollout status deployment/bookapp-backend --timeout=120s
       # - kubectl rollout status deployment/bookapp-frontend --timeout=120s
