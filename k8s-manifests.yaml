@@ -98,13 +98,13 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
 ---
-# 4. 프론트엔드 서비스 (LoadBalancer)
+# 4. 프론트엔드 서비스 LoadBalancer -> ClusterIP 도메인 연결 위해 변경
 apiVersion: v1
 kind: Service
 metadata:
   name: bookapp-frontend-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP # LoadBalancer
   ports:
     - port: 80
       targetPort: 80
