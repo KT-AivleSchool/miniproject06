@@ -21,15 +21,11 @@ phases:
 
   build:
     commands:
-      - echo "Build started on `date`"
-      - echo "Building and pushing frontend image..."
-      - docker buildx build --push -t $REPOSITORY_URI_FRONT:latest -t $REPOSITORY_URI_FRONT:$IMAGE_TAG ./frontend
-      - echo "Building and pushing backend image..."
-      - docker buildx build --push -t $REPOSITORY_URI_BACK:latest -t $REPOSITORY_URI_BACK:$IMAGE_TAG ./bookapp/bookapp
+      - echo "Build and push frontend image..."
+      - docker buildx build --platform linux/amd64 --provenance=false --push -t $REPOSITORY_URI_FRONT:latest -t $REPOSITORY_URI_FRONT:$IMAGE_TAG ./frontend
+      - echo "Build and push backend image..."
+      - docker buildx build --platform linux/amd64 --provenance=false --push -t $REPOSITORY_URI_BACK:latest -t $REPOSITORY_URI_BACK:$IMAGE_TAG ./bookapp/bookapp
 
-  post_build:
-    commands:
-      - echo "Build completed on `date`"
       - echo "Writing image definitions..."
       - printf '[{"name":"frontend","imageUri":"%s"},{"name":"backend","imageUri":"%s"}]' "$REPOSITORY_URI_FRONT:$IMAGE_TAG" "$REPOSITORY_URI_BACK:$IMAGE_TAG" > imagedefinitions.json
 
@@ -37,12 +33,12 @@ phases:
       - sed -i "s|416225317325.dkr.ecr.us-east-1.amazonaws.com/user30-back-repo:latest|${REPOSITORY_URI_BACK}:${IMAGE_TAG}|g" k8s-manifests.yaml
       - sed -i "s|416225317325.dkr.ecr.us-east-1.amazonaws.com/user30-front-repo:latest|${REPOSITORY_URI_FRONT}:${IMAGE_TAG}|g" k8s-manifests.yaml
 
-      - echo "Deploying to Amazon EKS..."
+      - echo "Deploying to EKS..."
       - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $EKS_CLUSTER_NAME
       - kubectl apply -f k8s-manifests.yaml
       - kubectl apply -f hpa.yaml
-      - kubectl rollout status deployment/bookapp-backend
-      - kubectl rollout status deployment/bookapp-frontend
+      - kubectl rollout status deployment/bookapp-backend --timeout=300s
+      - kubectl rollout status deployment/bookapp-frontend --timeout=300s
 
 artifacts:
   files:
