@@ -61,5 +61,5 @@ artifacts:
     #ECS용 EKS에선 사용 안함
     #- imagedefinitions.json
     - k8s-manifests.yaml
-    - deploy-buildspec.yaml   # 추가
+    - deploy-buildspec.yml   # 추가
     - hpa.yaml
