@@ -1,3 +1,136 @@
+## 1. 백엔드 디플로이먼트 (Spring Boot)
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: bookapp-backend
+#  labels:
+#    app: bookapp-backend
+#spec:
+#  replicas: 1
+#  strategy:
+#    type: RollingUpdate
+#    rollingUpdate:
+#      maxUnavailable: 0
+#      maxSurge: 1
+#  selector:
+#    matchLabels:
+#      app: bookapp-backend
+#  template:
+#    metadata:
+#      labels:
+#        app: bookapp-backend
+#    spec:
+#      containers:
+#        - name: backend
+#          # 이미지 경로는 ECR 업로드에 맞게 수정하십시오.
+#          image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<BACK_IMAGE_REPO_NAME>:latest
+#          ports:
+#            - containerPort: 8080
+#          readinessProbe:
+#            httpGet:
+#              path: /api/books
+#              port: 8080
+#            initialDelaySeconds: 20
+#            periodSeconds: 10
+#          volumeMounts:
+#            - name: db-volume
+#              # H2 파일 DB가 생성되는 경로인 /app/db를 영구 볼륨에 바인딩
+#              mountPath: /app/db
+#      volumes:
+#        - name: db-volume
+#          emptyDir: {}
+#---
+## 2. 백엔드 서비스 (ClusterIP - k8s 내부망 노출)
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: bookapp-backend-service
+#spec:
+#  type: ClusterIP
+#  ports:
+#    - port: 8080
+#      targetPort: 8080
+#  selector:
+#    app: bookapp-backend
+#---
+## 3. 프론트엔드 디플로이먼트 (React + Nginx 프록시)
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: bookapp-frontend
+#  labels:
+#    app: bookapp-frontend
+#spec:
+#  replicas: 2
+#  strategy:
+#    type: RollingUpdate
+#    rollingUpdate:
+#      maxUnavailable: 0
+#      maxSurge: 1
+#  selector:
+#    matchLabels:
+#      app: bookapp-frontend
+#  template:
+#    metadata:
+#      labels:
+#        app: bookapp-frontend
+#    spec:
+#      containers:
+#        - name: frontend
+#          # 이미지 경로는 ECR 업로드에 맞게 수정하십시오.
+#          image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<FRONT_IMAGE_REPO_NAME>:latest
+#          ports:
+#            - containerPort: 80
+#---
+## 4. 프론트엔드 서비스 (LoadBalancer - 외부 서비스 노출 및 SSL/HTTPS 적용)
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: bookapp-frontend-service
+#  annotations:
+#    # AWS ACM에서 발급받은 인증서 ARN 주소로 변경하십시오. (예: arn:aws:acm:us-east-1:123456789012:certificate/xxxx-xxxx-xxxx-xxxx)
+#    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-northeast-2:416225317325:certificate/a140fb47-7d1a-4c87-9e01-7243bfb899b0
+#    # HTTPS 통신을 위해 443 포트를 SSL 포트로 지정합니다.
+#    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+#    # 로드밸런서에서 백엔드 Pod로 트래픽을 넘길 때의 프로토콜입니다.
+#    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+#spec:
+#  type: LoadBalancer
+#  ports:
+#    - name: http
+#      port: 80
+#      targetPort: 80
+#    - name: https
+#      port: 443
+#      targetPort: 80
+#  selector:
+#    app: bookapp-frontend
+#
+#  apiVersion: networking.k8s.io/v1
+#  kind: Ingress
+#  metadata:
+#    name: chan-ingress
+#    namespace: default
+#    annotations:
+#      kubernetes.io/ingress.class: alb
+#      alb.ingress.kubernetes.io/scheme: internet-facing
+#      alb.ingress.kubernetes.io/target-type: ip
+#      # 🔒 방금 발급받은 ACM 인증서의 ARN 주소를 여기에 넣어줍니다.
+#      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:416225317325:certificate/a140fb47-7d1a-4c87-9e01-7243bfb899b0
+#      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+#      alb.ingress.kubernetes.io/ssl-redirect: '443'
+#  spec:
+#    rules:
+#      - host: aivle-22.p-e.kr  # 👈 나의 무료 도메인 주소
+#        http:
+#          paths:
+#            - path: /
+#              pathType: Prefix
+#              backend:
+#                service:
+#                  name: front-service  # 👈 실제 프론트엔드 Service 이름과 일치해야 합니다.
+#                  port:
+#                    number: 80
 # 1. 백엔드 디플로이먼트 (Spring Boot)
 apiVersion: apps/v1
 kind: Deployment
@@ -22,7 +155,6 @@ spec:
     spec:
       containers:
         - name: backend
-          # 이미지 경로는 ECR 업로드에 맞게 수정하십시오.
           image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<BACK_IMAGE_REPO_NAME>:latest
           ports:
             - containerPort: 8080
@@ -34,13 +166,12 @@ spec:
             periodSeconds: 10
           volumeMounts:
             - name: db-volume
-              # H2 파일 DB가 생성되는 경로인 /app/db를 영구 볼륨에 바인딩
               mountPath: /app/db
       volumes:
         - name: db-volume
           emptyDir: {}
 ---
-# 2. 백엔드 서비스 (ClusterIP - k8s 내부망 노출)
+# 2. 백엔드 서비스 (ClusterIP - 내부 통신망)
 apiVersion: v1
 kind: Service
 metadata:
@@ -53,7 +184,7 @@ spec:
   selector:
     app: bookapp-backend
 ---
-# 3. 프론트엔드 디플로이먼트 (React + Nginx 프록시)
+# 3. 프론트엔드 디플로이먼트 (React + Nginx)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -77,57 +208,48 @@ spec:
     spec:
       containers:
         - name: frontend
-          # 이미지 경로는 ECR 업로드에 맞게 수정하십시오.
           image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_DEFAULT_REGION>.amazonaws.com/<FRONT_IMAGE_REPO_NAME>:latest
           ports:
             - containerPort: 80
 ---
-# 4. 프론트엔드 서비스 (LoadBalancer - 외부 서비스 노출 및 SSL/HTTPS 적용)
+# 4. 프론트엔드 서비스 (NodePort - Ingress(ALB) 연동용으로 변경)
 apiVersion: v1
 kind: Service
 metadata:
   name: bookapp-frontend-service
-  annotations:
-    # AWS ACM에서 발급받은 인증서 ARN 주소로 변경하십시오. (예: arn:aws:acm:us-east-1:123456789012:certificate/xxxx-xxxx-xxxx-xxxx)
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-1:416225317325:certificate/4d873aaf-53b8-4be0-b4f1-8d874463402c"
-    # HTTPS 통신을 위해 443 포트를 SSL 포트로 지정합니다.
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
-    # 로드밸런서에서 백엔드 Pod로 트래픽을 넘길 때의 프로토콜입니다.
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
 spec:
-  type: LoadBalancer
+  type: NodePort # 👈 ALB 타겟그룹 연동을 위해 NodePort로 변경 (pending 방지)
   ports:
-    - name: http
-      port: 80
-      targetPort: 80
-    - name: https
-      port: 443
+    - port: 80
       targetPort: 80
   selector:
     app: bookapp-frontend
-
-  apiVersion: networking.k8s.io/v1
-  kind: Ingress
-  metadata:
-    name: chan-ingress
-    namespace: default
-    annotations:
-      kubernetes.io/ingress.class: alb
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      # 🔒 방금 발급받은 ACM 인증서의 ARN 주소를 여기에 넣어줍니다.
-      alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:416225317325:certificate/a140fb47-7d1a-4c87-9e01-7243bfb899b0
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-      alb.ingress.kubernetes.io/ssl-redirect: '443'
-  spec:
-    rules:
-      - host: aivle-22.p-e.kr  # 👈 나의 무료 도메인 주소
-        http:
-          paths:
-            - path: /
-              pathType: Prefix
-              backend:
-                service:
-                  name: front-service  # 👈 실제 프론트엔드 Service 이름과 일치해야 합니다.
-                  port:
-                    number: 80
+---
+# 5. 인그레스 설정 (AWS ALB 생성 및 SSL/도메인 매핑)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chan-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # 💡 alb 로드밸런서가 파드 IP로 직접 통신하도록 유도 (추천 설정)
+    alb.ingress.kubernetes.io/target-type: ip
+    # 🔒 발급 완료된 ACM 인증서 매핑
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:416225317325:certificate/a140fb47-7d1a-4c87-9e01-7243bfb899b0
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    # HTTP 요청을 HTTPS로 강제 리다이렉트
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+spec:
+  rules:
+    - host: aivle-22.p-e.kr  # 👈 나의 도메인 주소
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bookapp-frontend-service  # 👈 4번 서비스 이름과 정확히 일치시킴
+                port:
+                  number: 80
